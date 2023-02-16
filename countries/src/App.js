@@ -18,7 +18,6 @@ const Countries = ({ filteredCountries }) => {
 };
 
 const CountryDetail = (props) => {
-  console.log(props.country.languages);
   return (
     <div>
       <h2>{props.country.name.conmon}</h2>
@@ -30,13 +29,33 @@ const CountryDetail = (props) => {
           <li key={lang}>{lang}</li>
         ))}
       </ul>
-      <h1 style={{ fontSize: 100 }}>{props.country.flag}</h1>
+      <h1 style={{ fontSize: 80 }}>{props.country.flag}</h1>
     </div>
   );
 };
 
 const Country = (props) => {
-  return <div>{props.country.name.official}</div>;
+  const [show, setShow] = useState(false);
+  const handleShow = () => {
+    setShow(!show);
+  };
+
+  if (show) {
+    return (
+      <div>
+        <div>
+          {props.country.name.official}{" "}
+          <button onClick={handleShow}>show</button>
+        </div>
+        <CountryDetail country={props.country} />
+      </div>
+    );
+  }
+  return (
+    <div>
+      {props.country.name.official} <button onClick={handleShow}>show</button>
+    </div>
+  );
 };
 
 const App = () => {
@@ -49,7 +68,7 @@ const App = () => {
     setSearch(event.target.value);
     setFilteredCountries(
       countries.filter((country) =>
-        country.name.official.toLowerCase().includes(newSearch.toLowerCase())
+        country.name.common.toLowerCase().includes(newSearch.toLowerCase())
       )
     );
   };
