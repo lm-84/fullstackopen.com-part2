@@ -18,6 +18,26 @@ const Countries = ({ filteredCountries }) => {
 };
 
 const CountryDetail = (props) => {
+  const api_key = process.env.REACT_APP_API_KEY;
+  console.log(api_key);
+  const [temperature, setTemperature] = useState(0);
+  const [windSpeed, setwindSpeed] = useState(0);
+  const [windDirection, setwindDirection] = useState("");
+  const [icon, setIcon] = useState("");
+
+  useEffect(() => {
+    axios
+      .get("http://api.weatherstack.com/current", {
+        params: { access_key: api_key, query: props.country.capital[0] },
+      })
+      .then((response) => {
+        setTemperature(response.data.current.temperature);
+        setwindSpeed(response.data.current.wind_speed);
+        setwindDirection(response.data.current.wind_dir);
+        setIcon(response.data.current.weather_icons[0]);
+        console.log(response.data);
+      });
+  }, [api_key, props.country.capital]);
   return (
     <div>
       <h2>{props.country.name.conmon}</h2>
@@ -29,7 +49,21 @@ const CountryDetail = (props) => {
           <li key={lang}>{lang}</li>
         ))}
       </ul>
-      <h1 style={{ fontSize: 80 }}>{props.country.flag}</h1>
+      <h2 style={{ fontSize: 80 }}>{props.country.flag}</h2>
+      <h2>Weather in {props.country.capital}</h2>
+      <div>
+        <b>temperature: </b>
+        {temperature} Celsius
+      </div>
+      <div>
+        {" "}
+        <img src={icon} alt="Current weater icon" />
+      </div>
+      <div>
+        <b>wind: </b>
+        {windSpeed} mph direction {windDirection}
+        <hr></hr>
+      </div>
     </div>
   );
 };
