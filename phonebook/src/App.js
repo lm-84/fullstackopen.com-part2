@@ -78,9 +78,16 @@ const App = () => {
       return;
     } else {
       const personObject = { name: newName, number: newNumber };
-      setPersons(persons.concat(personObject));
-      setNewName("");
-      setNewNumber("");
+      axios
+        .post("http://localhost:3001/persons", personObject)
+        .then((response) => {
+          setPersons(persons.concat(response.data));
+          setNewName("");
+          setNewNumber("");
+        })
+        .catch((error) => {
+          alert("an has error occurred saving the new person");
+        });
     }
   };
 
