@@ -1,5 +1,5 @@
-import axios from "axios";
 import React, { useState, useEffect } from "react";
+import personService from "./services/persons";
 
 const Header = (props) => {
   return <h2>{props.text}</h2>;
@@ -24,13 +24,13 @@ const PersonForm = (props) => {
 
 const Persons = (props) => {
   return props.persons.map((person) => (
-    <Person name={person.name} number={person.number} />
+    <Person key={person.name} name={person.name} number={person.number} />
   ));
 };
 
 const Person = (props) => {
   return (
-    <div key={props.name}>
+    <div>
       {props.name} {props.number}
     </div>
   );
@@ -47,6 +47,7 @@ const Filter = (props) => {
 
 const App = () => {
   const [persons, setPersons] = useState([]);
+  const [filteredPersons, setFilteredPersons] = useState([]);
   const [newName, setNewName] = useState("");
   const [newNumber, setNewNumber] = useState("");
   const [filter, setFilter] = useState("");
@@ -61,11 +62,11 @@ const App = () => {
 
   const handleFilter = (event) => {
     setFilter(event.target.value);
+    const filtered = persons.filter((person) =>
+      person.name.toLowerCase().includes(event.target.value.toLowerCase())
+    );
+    setFilteredPersons(filtered);
   };
-
-  const filteredPersons = persons.filter((person) =>
-    person.name.toLowerCase().includes(filter.toLowerCase())
-  );
 
   function includesName(persons, name) {
     return persons.map((person) => person.name).includes(name);
@@ -78,23 +79,31 @@ const App = () => {
       return;
     } else {
       const personObject = { name: newName, number: newNumber };
-      axios
-        .post("http://localhost:3001/persons", personObject)
+      personService
+        .create(personObject)
         .then((response) => {
-          setPersons(persons.concat(response.data));
+          const personsNew = persons;
+          setPersons(personsNew.concat(response));
+          setFilteredPersons(personsNew.concat(response));
           setNewName("");
           setNewNumber("");
         })
         .catch((error) => {
-          alert("an has error occurred saving the new person");
+          alert("an error has occurred saving the new person");
         });
     }
   };
 
   useEffect(() => {
-    axios.get("http://localhost:3001/persons").then((response) => {
-      setPersons(response.data);
-    });
+    personService
+      .getAll()
+      .then((persons) => {
+        setPersons(persons);
+        setFilteredPersons(persons);
+      })
+      .catch((error) => {
+        alert("an error has ocurred reading the data base");
+      });
   }, []);
 
   return (
