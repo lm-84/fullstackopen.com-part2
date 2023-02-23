@@ -80,11 +80,37 @@ const App = () => {
 
   const addPerson = (event) => {
     event.preventDefault();
+    const personObject = { name: newName, number: newNumber };
     if (includesName(persons, newName)) {
-      alert(newName + " is already added to phonebook");
-      return;
+      if (
+        window.confirm(
+          newName +
+            " is already added to phonebook, replace the old number with a new one?"
+        ) === true &&
+        newName !== ""
+      ) {
+        personService
+          .update(
+            persons.find((person) => person.name === newName).id,
+            personObject
+          )
+          .then((response) => {
+            setPersons(
+              persons.map((person) =>
+                person.name !== newName ? person : response
+              )
+            );
+            setFilteredPersons(
+              filteredPersons.map((person) =>
+                person.name !== newName ? person : response
+              )
+            );
+          })
+          .catch((error) => {
+            alert("an error has occurred updating the person");
+          });
+      }
     } else {
-      const personObject = { name: newName, number: newNumber };
       personService
         .create(personObject)
         .then((response) => {
