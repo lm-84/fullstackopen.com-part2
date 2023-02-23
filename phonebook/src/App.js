@@ -24,14 +24,20 @@ const PersonForm = (props) => {
 
 const Persons = (props) => {
   return props.persons.map((person) => (
-    <Person key={person.name} name={person.name} number={person.number} />
+    <Person
+      key={person.name}
+      name={person.name}
+      number={person.number}
+      handleDelete={() => props.handleDelete(person)}
+    />
   ));
 };
 
 const Person = (props) => {
   return (
     <div>
-      {props.name} {props.number}
+      {props.name} {props.number}{" "}
+      <button onClick={() => props.handleDelete(props.person)}>delete</button>
     </div>
   );
 };
@@ -82,9 +88,9 @@ const App = () => {
       personService
         .create(personObject)
         .then((response) => {
-          const personsNew = persons;
-          setPersons(personsNew.concat(response));
-          setFilteredPersons(personsNew.concat(response));
+          const personsNew = [...persons, response];
+          setPersons(personsNew);
+          setFilteredPersons(personsNew);
           setNewName("");
           setNewNumber("");
         })
@@ -106,6 +112,27 @@ const App = () => {
       });
   }, []);
 
+  const handleDelete = (personToDelete) => {
+    if (
+      window.confirm(`Do you really want to delete ${personToDelete.name}?`)
+    ) {
+      personService
+        .erase(personToDelete.id)
+        .then((response) => {
+          const personsAux = persons;
+          setPersons(
+            personsAux.filter((person) => person.name !== personToDelete.name)
+          );
+          setFilteredPersons(
+            personsAux.filter((person) => person.name !== personToDelete.name)
+          );
+        })
+        .catch((error) => {
+          alert("An error has occurred deleting the person");
+        });
+    }
+  };
+
   return (
     <div>
       <Header text="Phonebook" />
@@ -119,7 +146,7 @@ const App = () => {
         handleNameChange={handleNameChange}
       />
       <Header text="Numbers" />
-      <Persons persons={filteredPersons} />
+      <Persons persons={filteredPersons} handleDelete={handleDelete} />
     </div>
   );
 };

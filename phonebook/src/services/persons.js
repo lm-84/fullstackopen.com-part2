@@ -11,4 +11,10 @@ const create = (personObject) => {
   return request.then((response) => response.data);
 };
 
-export default { getAll, create };
+const erase = (id) => {
+  const request = axios.delete(`${baseUrl}/${id}`);
+  console.log(request.then((response) => response.data));
+  return request.then((response) => response.data);
+};
+
+export default { getAll, create, erase };
