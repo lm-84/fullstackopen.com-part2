@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import personService from "./services/persons";
+import "./index.css";
 
 const Header = (props) => {
   return <h2>{props.text}</h2>;
@@ -51,12 +52,21 @@ const Filter = (props) => {
   );
 };
 
+const Notification = ({ message }) => {
+  if (message === "") {
+    return null;
+  }
+
+  return <div className="message">{message}</div>;
+};
+
 const App = () => {
   const [persons, setPersons] = useState([]);
   const [filteredPersons, setFilteredPersons] = useState([]);
   const [newName, setNewName] = useState("");
   const [newNumber, setNewNumber] = useState("");
   const [filter, setFilter] = useState("");
+  const [confirmMessage, setConfirmMessage] = useState("");
 
   const handleNameChange = (event) => {
     setNewName(event.target.value);
@@ -105,6 +115,8 @@ const App = () => {
                 person.name !== newName ? person : response
               )
             );
+            setConfirmMessage("Updated " + newName);
+            setTimeout(() => setConfirmMessage(""), 5000);
           })
           .catch((error) => {
             alert("an error has occurred updating the person");
@@ -119,6 +131,8 @@ const App = () => {
           setFilteredPersons(personsNew);
           setNewName("");
           setNewNumber("");
+          setConfirmMessage("Added " + newName);
+          setTimeout(() => setConfirmMessage(""), 5000);
         })
         .catch((error) => {
           alert("an error has occurred saving the new person");
@@ -132,6 +146,8 @@ const App = () => {
       .then((persons) => {
         setPersons(persons);
         setFilteredPersons(persons);
+        setConfirmMessage("Database read");
+        setTimeout(() => setConfirmMessage(""), 5000);
       })
       .catch((error) => {
         alert("an error has ocurred reading the data base");
@@ -152,6 +168,8 @@ const App = () => {
           setFilteredPersons(
             personsAux.filter((person) => person.name !== personToDelete.name)
           );
+          setConfirmMessage("Deleted " + personToDelete.name);
+          setTimeout(() => setConfirmMessage(""), 5000);
         })
         .catch((error) => {
           alert("An error has occurred deleting the person");
@@ -162,6 +180,7 @@ const App = () => {
   return (
     <div>
       <Header text="Phonebook" />
+      <Notification message={confirmMessage} />
       <Filter filter={filter} handleFilter={handleFilter} />
       <Header text="Add new" />
       <PersonForm
