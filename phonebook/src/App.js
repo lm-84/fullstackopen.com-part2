@@ -1,64 +1,11 @@
 import React, { useState, useEffect } from "react";
 import personService from "./services/persons";
 import "./index.css";
-
-const Header = (props) => {
-  return <h2>{props.text}</h2>;
-};
-
-const PersonForm = (props) => {
-  return (
-    <form onSubmit={props.addPerson}>
-      <div>
-        name: <input value={props.newName} onChange={props.handleNameChange} />
-      </div>
-      <div>
-        number:{" "}
-        <input value={props.newNumber} onChange={props.handleNumberChange} />
-      </div>
-      <div>
-        <button type="submit">add</button>
-      </div>
-    </form>
-  );
-};
-
-const Persons = (props) => {
-  return props.persons.map((person) => (
-    <Person
-      key={person.name}
-      name={person.name}
-      number={person.number}
-      handleDelete={() => props.handleDelete(person)}
-    />
-  ));
-};
-
-const Person = (props) => {
-  return (
-    <div>
-      {props.name} {props.number}{" "}
-      <button onClick={() => props.handleDelete(props.person)}>delete</button>
-    </div>
-  );
-};
-
-const Filter = (props) => {
-  return (
-    <div>
-      filter shown with:
-      <input value={props.filter} onChange={props.handleFilter} />
-    </div>
-  );
-};
-
-const Notification = ({ message }) => {
-  if (message === "") {
-    return null;
-  }
-
-  return <div className="message">{message}</div>;
-};
+import Filter from "./components/Filter";
+import Header from "./components/Header";
+import Notification from "./components/Notification";
+import PersonForm from "./components/PersonForm";
+import Persons from "./components/Persons";
 
 const App = () => {
   const [persons, setPersons] = useState([]);
@@ -67,6 +14,7 @@ const App = () => {
   const [newNumber, setNewNumber] = useState("");
   const [filter, setFilter] = useState("");
   const [confirmMessage, setConfirmMessage] = useState("");
+  const [errorMessage, setErrorMessage] = useState("");
 
   const handleNameChange = (event) => {
     setNewName(event.target.value);
@@ -158,21 +106,35 @@ const App = () => {
     if (
       window.confirm(`Do you really want to delete ${personToDelete.name}?`)
     ) {
+      const personsAux = persons;
+      const FilteredPersonsAux = filteredPersons;
       personService
         .erase(personToDelete.id)
         .then((response) => {
-          const personsAux = persons;
           setPersons(
             personsAux.filter((person) => person.name !== personToDelete.name)
           );
           setFilteredPersons(
-            personsAux.filter((person) => person.name !== personToDelete.name)
+            FilteredPersonsAux.filter(
+              (person) => person.name !== personToDelete.name
+            )
           );
           setConfirmMessage("Deleted " + personToDelete.name);
           setTimeout(() => setConfirmMessage(""), 5000);
         })
         .catch((error) => {
-          alert("An error has occurred deleting the person");
+          setErrorMessage(
+            `Information of ${personToDelete.name} has already been removed from server`
+          );
+          setPersons(
+            personsAux.filter((person) => person.name !== personToDelete.name)
+          );
+          setFilteredPersons(
+            FilteredPersonsAux.filter(
+              (person) => person.name !== personToDelete.name
+            )
+          );
+          setTimeout(() => setErrorMessage(""), 5000);
         });
     }
   };
@@ -180,7 +142,8 @@ const App = () => {
   return (
     <div>
       <Header text="Phonebook" />
-      <Notification message={confirmMessage} />
+      <Notification message={confirmMessage} classText={"message"} />
+      <Notification message={errorMessage} classText={"error"} />
       <Filter filter={filter} handleFilter={handleFilter} />
       <Header text="Add new" />
       <PersonForm
